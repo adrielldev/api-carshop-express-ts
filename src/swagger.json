@@ -1,0 +1,173 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "capstone",
+    "description": "aplicação para venda e leilão de veiculos",
+    "termsOfService": "http://localhost:3000/terms",
+    "contact": {
+      "email": "raony.silva.moura@gmail.com"
+    }
+  },
+  "version": "1.0.0",
+  "servers": [
+    {
+      "url": "http://localhost:3000/",
+      "description": "ambiente de teste"
+    },
+    {
+      "url": "http://www.urlDeploy/",
+      "description": "ambiente de produção"
+    }
+  ],
+  "paths": {
+    "/announces": {
+      "post": {
+        "summary": "Criação de um anuncio de venda ou leilão.",
+        "description": "Registrar um veiculo e exibi-lo publicamente associando ao anunciante. O anuncio recebe um objeto de usuario, o objeto é inserido no service mas as informações são passadas atraves do token de login",
+        "tags": ["anuncios"],
+        "security":[{"bearerAuth":[]}],
+        "requestBody": {
+          "content": {
+            "aplication/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Announce"
+              },
+              "examples": {
+                "Announce": {
+                  "value": {
+                    "announceType": "VENDA",
+                    "vehicleType": "CARRO",
+                    "description": "celta de 2019, bateu só uma vez",
+                    "mileage": 2000.2,
+                    "price": 3000.0,
+                    "title": "celta 2019 batido",
+                    "year": "2019"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Field Error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "aplication/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Announce"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Listar todos os anuncios da aplicação.",
+        "description": "Exibe todos os anuncios com os dados relacionados ao annunciante, comentarios e imagens.",
+        "tags": ["anuncios"]
+      }
+    },
+    "/announces/:id": {
+      "get": {
+        "summary": "Listar todos um unico anuncio e exibir as informações de forma completa.",
+        "description": "exibe as informações do produto, comentarios, anunciante. Destinado a uma pagina de produto individual.",
+        "tags": ["anuncios por ID"]
+      },
+      "patch": {
+        "summary": "Edição de um anuncio para corrigir informações",
+        "description": "Edição só pode ser feita pelo anunciante",
+        "tags": ["anuncios por ID"],
+        "security":[{"bearerAuth":[]}],
+        "requestBody": {
+          "content": {
+            "aplication/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Announce"
+              },
+              "examples": {
+                "Announce": {
+                  "value": {
+                    "announceType": "VENDA",
+                    "vehicleType": "CARRO",
+                    "description": "celta de 2019, bateu só duas vezes",
+                    "mileage": 2020.2,
+                    "price": 2050.0,
+                    "title": "celta 2019 batido",
+                    "year": "2019"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+            "400": {
+              "description": "Field Error"
+            },
+            "401": {
+              "description": "Unauthorized"
+            },
+            "200": {
+              "description": "OK",
+              "content": {
+                "aplication/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Announce"
+                  }
+                }
+              }
+            }
+          }
+      },
+      "delete": {
+        "summary": "Excluir um anuncio da aplicação.",
+        "description": "Somente o anunciante ou um administrador tem permissão para excluir um anuncio.",
+        "tags": ["anuncios por ID"],
+        "security":[{"bearerAuth":[]}]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Announce": {
+        "type": "object",
+        "properties": {
+          "announceType": {
+            "type": "string"
+          },
+          "vehicleType": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "mileage": {
+            "type": "decimal"
+          },
+          "price": {
+            "type": "decimal"
+          },
+          "title": {
+            "type": "string"
+          },
+          "year": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes":{
+      "bearerAuth":{
+        "type":"http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT" 
+      }
+    }
+  }
+}

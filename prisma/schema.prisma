@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(uuid())
+  name        String   @db.VarChar(100)
+  email       String   @unique @db.VarChar(50)
+  cpf         String   @unique @db.VarChar(11)
+  birthDate   DateTime
+  bio         String   @db.VarChar(2000)
+  password    String
+  accountType String   @db.VarChar(20)
+
+  address   Address @relation(fields: [addressId], references: [id], onDelete: Cascade)
+  addressId String  @unique
+
+  postedAnnounces Announce[] @relation("postedAnnounces")
+  postedComents   Comment[]  @relation("postedComents")
+
+  @@unique([email, password])
+  @@map("user")
+}
+
+model Announce {
+  id           String       @id @default(uuid())
+  announceType announceType @default(VENDA)
+  title        String       @db.VarChar(255)
+  year         String       @db.VarChar(4)
+  mileage      Decimal
+  price        Decimal
+  description  String       @db.VarChar(500)
+  vehicleType  vehicleType  @default(CARRO)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  coverImage   String       @db.VarChar()
+
+  author   User   @relation("postedAnnounces", fields: [authorId], references: [id], onDelete: Cascade)
+  authorId String
+
+  comments Comment[] @relation("comments")
+
+  galeryImage Asset[] @relation("galeryImages")
+
+  @@map("announce")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String   @db.VarChar(1000)
+  createdAt DateTime @default(now())
+
+  author   User   @relation("postedComents", fields: [authorId], references: [id], onDelete: Cascade)
+  authorId String
+
+  announce   Announce @relation("comments", fields: [announceId], references: [id], onDelete: Cascade)
+  announceId String
+
+  @@map("comment")
+}
+
+model Asset {
+  id  String @id @default(uuid())
+  url String
+
+  announce   Announce @relation("galeryImages", fields: [announceId], references: [id], onDelete: Cascade)
+  announceId String
+
+  @@map("asset")
+}
+
+model Address {
+  id         String @id @default(uuid())
+  cep        String @db.VarChar(20)
+  state      String @db.VarChar(20)
+  street     String @db.VarChar(100)
+  number     String @db.VarChar(10)
+  complement String @db.VarChar(100)
+
+  user User?
+
+  @@map("address")
+}
+
+enum vehicleType {
+  CARRO
+  MOTO
+}
+
+enum announceType {
+  VENDA
+  LEILAO
+}
